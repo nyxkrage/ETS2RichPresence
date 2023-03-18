@@ -22,30 +22,9 @@ namespace ets2_discord_rich_presence
 
         static void Main(string[] args)
         {
-            new Timer(CheckEuroTruckRunning, null, 0, 5000);
             Console.WriteLine("Press any key to terminate..");
             cbHandler = new CallbackHandler();
             Console.ReadKey();
-        }
-
-        private static void CheckEuroTruckRunning(Object o)
-        {
-            Process[] p = Process.GetProcessesByName("eurotrucks2");
-            if (p.Length == 0)
-            {
-                sdkClient.Data -= cbHandler.onTelemetryData;
-                rpcClient.ClearPresence();
-                rpcClient.Dispose();
-            }
-            else
-            {
-                startTime = p[0].StartTime;
-                richPrecense.Timestamps.Start = startTime;
-                if (rpcClient.IsDisposed)
-                {
-                    Program.rpcClient.Initialize();
-                }
-            }
         }
     }
 
@@ -77,7 +56,7 @@ namespace ets2_discord_rich_presence
             Program.sdkClient = new Ets2SdkTelemetry(1000);
             Program.sdkClient.Data += onTelemetryData;
             Program.sdkClient.JobStarted += (object _o, EventArgs _e) => { };
-            Program.sdkClient.JobFinished += (object _o, EventArgs _e) => { }; ;
+            Program.sdkClient.JobFinished += (object _o, EventArgs _e) => { };
         }
 
         static Dictionary<string, string> countryImageKeys = new Dictionary<string, string>() {
@@ -167,7 +146,14 @@ namespace ets2_discord_rich_presence
             }
             else
             {
-                Program.richPrecense.Timestamps.Start = Program.startTime;
+                var p = Process.GetProcessesByName("eurotrucks2");
+                if (p.Length > 0)
+                {
+                    Program.richPrecense.Timestamps.Start = p[0].StartTime.ToUniversalTime();
+                } else
+                {
+                    Program.richPrecense.Timestamps.Start = Process.GetCurrentProcess().StartTime.ToUniversalTime();
+                }
                 Program.richPrecense.Timestamps.End = null;
                 sbState.AppendFormat("📍 {1}, {0}", countryName, closestCity);
             }
