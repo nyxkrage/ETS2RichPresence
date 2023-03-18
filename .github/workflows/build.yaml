@@ -1,0 +1,35 @@
+name: Build ETS2RichPresence
+
+on: [workflow_call]
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.2
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+      - name: Navigate to Workspace
+        run: cd $GITHUB_WORKSPACE
+
+      - name: Restore Packages
+        run: nuget restore ETS2DiscordRichPresence.sln
+
+      - name: Build Solution
+        run: |
+          msbuild.exe ETS2DiscordRichPresence.sln /nologo /p:DeleteExistingFiles=True /p:platform="Any CPU" /p:configuration="Release"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ETS2RichPresenceArtifact
+          path: "./Build/Release"

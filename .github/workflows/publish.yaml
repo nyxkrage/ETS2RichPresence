@@ -1,0 +1,27 @@
+name: Publish ETS2RichPresence
+on:
+  push:
+    tags:
+      - "v*.*.*"
+jobs:
+  build:
+    uses: ./.github/workflows/build.yaml  # use the callable tests job to run tests
+  deploy:
+    needs: [build]  # require tests to pass before deploy runs
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ETS2RichPresenceArtifact
+
+      - name: Archive Build Artifacts
+        run: zip ets2richpresence.zip ./* -r
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ets2richpresence.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
