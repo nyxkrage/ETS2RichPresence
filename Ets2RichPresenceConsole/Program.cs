@@ -11,9 +11,18 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Windows.Forms;
 using System.Drawing;
+using Ets2RichPresence;
 
 namespace Ets2RichPresenceConsole
 {
+    class ConsoleLogger : ILogger
+    {
+        public void Log(string message)
+        {
+            Console.WriteLine(message);
+        }
+    }
+
     internal class Program
     {
 
@@ -36,7 +45,7 @@ namespace Ets2RichPresenceConsole
 
             SetConsoleWindowVisibility(false);
             Console.WriteLine("Running!");
-            new Ets2RichPresence.Ets2RichPresence().Initalize();
+            new Ets2RichPresence.Ets2RichPresence(new ConsoleLogger()).Initalize();
 
             // Standard message loop to catch click-events on notify icon
             // Code after this method will be running only after Application.Exit()

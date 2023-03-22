@@ -11,9 +11,14 @@ using Ets2RichPresence;
 
 namespace ETS2RichPresenceUI
 {
+    public class NoLogger : ILogger
+    {
+        public void Log(string message) {}
+    }
+
     public partial class ETS2RichPresenceUI : Form
     {
-        public Ets2RichPresence.Ets2RichPresence richPresence = new Ets2RichPresence.Ets2RichPresence();
+        public Ets2RichPresence.Ets2RichPresence richPresence = new Ets2RichPresence.Ets2RichPresence(new NoLogger());
         public RichPresenceConfig richPresenceConfig = new RichPresenceConfig();
         NotifyIcon notifyIcon = new NotifyIcon();
 

@@ -10,36 +10,60 @@ using System.Diagnostics;
 
 namespace Ets2RichPresence
 {
+    public interface ILogger
+    {
+        void Log(string message);
+    }
+
     public class Ets2RichPresence
     {
         public DiscordRpcClient rpcClient;
         public Ets2SdkTelemetry sdkClient;
         public RichPresenceConfig config = new RichPresenceConfig();
+        public ILogger logger;
 
-        public Ets2RichPresence()
+        public Ets2RichPresence(ILogger logger)
         {
+            this.logger = logger;
         }
 
         public void Initalize()
         {
+            logger.Log("Initalizing Discord RPC Client");
             rpcClient = new DiscordRpcClient("1085647354641780868");
             rpcClient.OnConnectionEstablished += InitTelemetry;
+            rpcClient.OnError += OnError;
             rpcClient.Initialize();
+            logger.Log("Initalized Discord RPC Client");
         }
 
         public void Deinitalize()
         {
+            logger.Log("Disposing Telemetry SDK Client");
             sdkClient.Data -= onTelemetryData;
             sdkClient = null;
+            logger.Log("Disposed Telemetry SDK Client");
+            logger.Log("Disposing Discord RPC Client");
             rpcClient.ClearPresence();
             rpcClient.Dispose();
             rpcClient = null;
+            logger.Log("Disposed Discord RPC Client");
+            logger.Log("Invoking GC Sweep");
+
             GC.Collect();
+        }
+
+        void OnError(object sender, object e)
+        {
+            logger.Log($"Error: ${e}");
         }
 
         void InitTelemetry(object sender, ConnectionEstablishedMessage e)
         {
+            logger.Log("Initializing Telemetry SDK Client");
             sdkClient = NewTelemetry();
+            logger.Log("Initialized Telemetry SDK Client");
+
         }
 
         public Ets2SdkTelemetry NewTelemetry()
@@ -53,7 +77,10 @@ namespace Ets2RichPresence
 
         void onTelemetryData(Ets2Telemetry data, bool newTimestamp)
         {
+            logger.Log("Received Telemetry Data");
+            logger.Log("Updating Rich Presence");
             rpcClient.SetPresence(TelemetryHandler.NewRichPresence(data, config));
+            logger.Log("Updated Rich Presence");
         }
     }
 
